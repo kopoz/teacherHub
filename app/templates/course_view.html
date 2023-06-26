@@ -1,0 +1,45 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+  <script src="static/crud.js"></script>
+
+
+
+  <h1>Courses</h1>
+
+  <form action="{{ url_for('course_api.create_course') }}" method="post">
+    <input type="text" name="name" placeholder="Course Name" required>
+    <input type="text" name="schedule" placeholder="Course Schedule" required>
+    <input type="number" name="year" placeholder="Year" required>
+    <input type="text" name="general_appraisal" placeholder="General Appraisal" required>
+    <button type="submit" class="btn btn-primary">Create Course</button>
+  </form>
+
+  <table class="table table-striped mt-4">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Schedule</th>
+        <th>Year</th>
+        <th>General Appraisal</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for course in courses %}
+      <tr>
+        <td>{{ course.name }}</td>
+        <td>{{ course.schedule }}</td>
+        <td>{{ course.year }}</td>
+        <td>{{ course.general_appraisal }}</td>
+        <td>
+          <a href="{{ url_for('course_api.update_course', id=course.id) }}" class="btn btn-warning btn-sm">Edit</a>
+          <a href="#" class="btn btn-danger btn-sm delete-resource" data-url="{{ url_for('course_api.delete_course', id=course.id) }}">Delete</a>
+
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

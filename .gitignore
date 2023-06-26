@@ -1,0 +1,30 @@
+# Python
+*.pyc
+*.pyo
+*.pyd
+*.pyc
+*.egg
+*.egg-info/
+dist/
+build/
+*__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# IDEs and text editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*.toc
+*.bak
+*.bak2
+*.bak3
+*.db.bak
+*.sublime-project
+*.sublime-workspace
+
+# Flask stuff
+instance/
