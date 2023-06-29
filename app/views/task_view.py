@@ -1,6 +1,9 @@
 # backend/app/views/task_view.py
 from flask import Blueprint, request, jsonify, render_template
 from ..models import db, Task
+from werkzeug.utils import secure_filename
+import os
+
 
 task_bp = Blueprint('task_bp', __name__)
 
@@ -11,17 +14,33 @@ def tasks_view():
 
 task_api_bp = Blueprint('task_api_bp', __name__)
 
+
+# Make sure to configure the allowed file types
+ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg', 'gif'}
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
 @task_api_bp.route('/api/v1/tasks', methods=['POST'])
 def create_task():
     data = request.get_json()
-    new_task = Task(name=data['name'], 
-                    content=data['content'], 
-                    related_links=data['related_links'], 
-                    tags=data['tags'], 
-                    targeted_school_year=data['targeted_school_year'], 
-                    time_estimation=data['time_estimation'], 
-                    objectives=data['objectives'], 
-                    trunk_content=data['trunk_content'])
+    new_task = Task(
+        content=data.get('content'),
+        name=data.get('name'),
+        targeted_school_year=data.get('targeted_school_year'),
+        time_estimation=data.get('time_estimation'),
+    )
+    if 'additional_files' in request.files:
+        files = request.files.getlist('additional_files')
+        filenames = []
+        for file in files:
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(UPLOAD_FOLDER, filename))
+                filenames.append(filename)
+        new_task.additional_files = filenames
     db.session.add(new_task)
     db.session.commit()
     return jsonify(new_task.to_dict()), 201
@@ -31,29 +50,35 @@ def get_tasks():
     tasks = Task.query.all()
     return jsonify([task.to_dict() for task in tasks])
 
-@task_api_bp.route('/api/v1/tasks/<id>', methods=['GET'])
+@task_api_bp.route('/api/v1/tasks/<int:id>', methods=['GET'])
 def get_task(id):
     task = Task.query.get_or_404(id)
     return jsonify(task.to_dict())
 
-@task_api_bp.route('/api/v1/tasks/<id>', methods=['PUT'])
+@task_api_bp.route('/api/v1/tasks/<int:id>', methods=['PUT'])
 def update_task(id):
-    data = request.get_json()
     task = Task.query.get_or_404(id)
-    task.name = data['name']
-    task.content = data['content']
-    task.related_links = data['related_links']
-    task.tags = data['tags']
-    task.targeted_school_year = data['targeted_school_year']
-    task.time_estimation = data['time_estimation']
-    task.objectives = data['objectives']
-    task.trunk_content = data['trunk_content']
+    data = request.get_json()
+    task.content = data.get('content')
+    task.name = data.get('name')
+    task.targeted_school_year = data.get('targeted_school_year')
+    task.time_estimation = data.get('time_estimation')
     db.session.commit()
     return jsonify(task.to_dict())
 
-@task_api_bp.route('/api/v1/tasks/<id>', methods=['DELETE'])
+@task_api_bp.route('/api/v1/tasks/<int:id>', methods=['DELETE'])
 def delete_task(id):
     task = Task.query.get_or_404(id)
     db.session.delete(task)
     db.session.commit()
     return '', 204
+
+
+from flask import send_from_directory
+
+# make sure your app knows where to find the uploaded files
+UPLOAD_FOLDER = 'uploads/'
+
+@task_api_bp.route('/files/<filename>')
+def get_file(filename):
+    return send_from_directory(UPLOAD_FOLDER, filename, as_attachment=True)

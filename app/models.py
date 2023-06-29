@@ -3,73 +3,47 @@ from datetime import datetime
 
 db = SQLAlchemy()
 
-class Task(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    content = db.Column(db.Text, nullable=False)
-    targeted_school_year = db.Column(db.Integer, nullable=False)
-    time_estimation = db.Column(db.Integer)
-    objectives = db.Column(db.String(255))
-    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
-
-    # Relationship fields
-    related_links = db.relationship('RelatedLink', backref='task', lazy=True)
-    tags = db.relationship('Tag', backref='task', lazy=True)
-    trunk_contents = db.relationship('TrunkContent', backref='task', lazy=True)
-
-    def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
-
-class RelatedLink(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    link = db.Column(db.String(255), nullable=False)
-    task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
-
-    def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
+tags = db.Table('tags',
+    db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), primary_key=True),
+    db.Column('task_id', db.Integer, db.ForeignKey('task.id'), primary_key=True)
+)
 
 class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    tag = db.Column(db.String(100), nullable=False)
-    task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
-
+    name = db.Column(db.String(120), unique=True, nullable=False)
     def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        return {
+            'id': self.id,
+            'name': self.name,
+        }
 
-
-class TrunkContent(db.Model):
+class File(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    content = db.Column(db.String(255), nullable=False)
+    path = db.Column(db.String(120), nullable=False)  # path to file on server
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
-
-    def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
-
-class Course(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    year = db.Column(db.Integer, nullable=False)
-    schedule = db.Column(db.String(100), nullable=False)
-    general_appraisal = db.Column(db.Text)
-    # teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id'), nullable=False)
-    tasks = db.relationship('Task', backref='course', lazy=True)
 
     def to_dict(self):
         return {
-            "id": self.id,
-            "name": self.name,
-            "year": self.year,
-            "schedule": self.schedule,
-            "general_appraisal": self.general_appraisal
-            # and so on for the other fields
+            'id': self.id,
+            'path': self.path,
+            'task_id': self.task_id,
         }
 
-
-class Objective(db.Model):
+class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    content = db.Column(db.Text, nullable=False)
-    scoring = db.Column(db.Integer, nullable=False)
-    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
+    content = db.Column(db.Text, nullable=True)
+    name = db.Column(db.String(120))
+    targeted_school_year = db.Column(db.String(120))
+    time_estimation = db.Column(db.Integer)
+    tags = db.relationship('Tag', secondary=tags, lazy='subquery', 
+        backref=db.backref('tasks', lazy=True))
+    additional_files = db.relationship('File', backref='task', lazy=True)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'content': self.content,
+            'name': self.name,
+            'targeted_school_year': self.targeted_school_year,
+            'time_estimation': self.time_estimation,
+        }
