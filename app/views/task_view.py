@@ -12,10 +12,6 @@ def tasks_view():
     tasks = Task.query.all()
     return render_template('tasks_view.html', tasks=tasks)
 
-@task_bp.route('/test', methods=['GET'])
-def test():
-    tasks = Task.query.all()
-    return render_template('tasks_view_copy.html', tasks=tasks)
 
 task_api_bp = Blueprint('task_api_bp', __name__)
 
