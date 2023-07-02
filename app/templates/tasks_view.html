@@ -10,6 +10,9 @@
 
 <h1>Tasks</h1>
 
+<div id="alert-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
+  <!-- Alerts will be added here -->
+</div>
 <!-- Task Form Card -->
 <div class="card">
   <div class="card-header" id="taskFormHeading">
@@ -21,7 +24,7 @@
 
   <div id="task-form-container" class="collapse" aria-labelledby="taskFormHeading">
     <div class="card-body">
-      <form id="task-form" action="{{ url_for('task_api_bp.create_task') }}" method="post" enctype="multipart/form-data">
+      <form id="task-form" data-action-url="{{ url_for('task_api_bp.create_task') }}" method="post" enctype="multipart/form-data">
         <div class="form-group">
           <label for="name">Task Name</label>
           <input type="text" class="form-control" id="name" name="name" placeholder="Task Name" required>

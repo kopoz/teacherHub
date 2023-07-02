@@ -12,6 +12,11 @@ def tasks_view():
     tasks = Task.query.all()
     return render_template('tasks_view.html', tasks=tasks)
 
+@task_bp.route('/test', methods=['GET'])
+def test():
+    tasks = Task.query.all()
+    return render_template('tasks_view_copy.html', tasks=tasks)
+
 task_api_bp = Blueprint('task_api_bp', __name__)
 
 
@@ -25,24 +30,31 @@ def allowed_file(filename):
 
 @task_api_bp.route('/api/v1/tasks', methods=['POST'])
 def create_task():
-    data = request.get_json()
+    content = request.form.get('content')
+    name = request.form.get('name')
+    targeted_school_year = request.form.get('targeted_school_year')
+    time_estimation = request.form.get('time_estimation')
+    additional_files = request.files.getlist('additional_files')
+
     new_task = Task(
-        content=data.get('content'),
-        name=data.get('name'),
-        targeted_school_year=data.get('targeted_school_year'),
-        time_estimation=data.get('time_estimation'),
+        content=content,
+        name=name,
+        targeted_school_year=targeted_school_year,
+        time_estimation=time_estimation,
     )
-    if 'additional_files' in request.files:
-        files = request.files.getlist('additional_files')
+
+    if additional_files:
         filenames = []
-        for file in files:
+        for file in additional_files:
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
                 file.save(os.path.join(UPLOAD_FOLDER, filename))
                 filenames.append(filename)
         new_task.additional_files = filenames
+
     db.session.add(new_task)
     db.session.commit()
+
     return jsonify(new_task.to_dict()), 201
 
 @task_api_bp.route('/api/v1/tasks', methods=['GET'])
