@@ -1,11 +1,13 @@
 # backend/app/views/task_view.py
+from flask import send_from_directory
 from flask import Blueprint, request, jsonify, render_template
-from ..models import db, Task
+from ..models import db, Task, Tag
 from werkzeug.utils import secure_filename
 import os
 
 
 task_bp = Blueprint('task_bp', __name__)
+
 
 @task_bp.route('/tasks', methods=['GET'])
 def tasks_view():
@@ -18,6 +20,7 @@ task_api_bp = Blueprint('task_api_bp', __name__)
 
 # Make sure to configure the allowed file types
 ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg', 'gif'}
+
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -39,6 +42,14 @@ def create_task():
         time_estimation=time_estimation,
     )
 
+    tag_names = request.form.getlist('tags[]')
+    for name in tag_names:
+        tag = Tag.query.filter_by(name=name).first()
+        if not tag:
+            tag = Tag(name=name)
+            db.session.add(tag)
+        new_task.tags.append(tag)
+
     if additional_files:
         filenames = []
         for file in additional_files:
@@ -53,15 +64,18 @@ def create_task():
 
     return jsonify(new_task.to_dict()), 201
 
+
 @task_api_bp.route('/api/v1/tasks', methods=['GET'])
 def get_tasks():
     tasks = Task.query.all()
     return jsonify([task.to_dict() for task in tasks])
 
+
 @task_api_bp.route('/api/v1/tasks/<int:id>', methods=['GET'])
 def get_task(id):
     task = Task.query.get_or_404(id)
     return jsonify(task.to_dict())
+
 
 @task_api_bp.route('/api/v1/tasks/<int:id>', methods=['PUT'])
 def update_task(id):
@@ -74,6 +88,7 @@ def update_task(id):
     db.session.commit()
     return jsonify(task.to_dict())
 
+
 @task_api_bp.route('/api/v1/tasks/<int:id>', methods=['DELETE'])
 def delete_task(id):
     task = Task.query.get_or_404(id)
@@ -82,11 +97,17 @@ def delete_task(id):
     return '', 204
 
 
-from flask import send_from_directory
-
 # make sure your app knows where to find the uploaded files
 UPLOAD_FOLDER = 'uploads/'
+
 
 @task_api_bp.route('/files/<filename>')
 def get_file(filename):
     return send_from_directory(UPLOAD_FOLDER, filename, as_attachment=True)
+
+
+@task_api_bp.route('/api/v1/tags', methods=['GET'])
+def get_tags():
+    query = request.args.get('q', '')
+    tags = Tag.query.filter(Tag.name.like(f'%{query}%')).all()
+    return jsonify(tags=[tag.to_dict() for tag in tags])

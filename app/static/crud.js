@@ -89,3 +89,33 @@ function toggleDisplayDiv() {
     });
   });
 }
+
+$(document).ready(function() {
+  var url = $('#tags').data('url');  // Get URL from data-url attribute
+
+  $('#tags').select2({
+    width: '100%',
+    tags: true,
+    tokenSeparators: [','],
+    ajax: {
+      url: url,
+      dataType: 'json',
+      delay: 250,
+      data: function (params) {
+        return {
+          q: params.term
+        };
+      },
+      processResults: function (data) {
+        return {
+          results: data.tags.map(function(tag) {
+            return { id: tag.id, text: tag.name };
+          })
+        };
+      },
+      cache: true
+    },
+    minimumInputLength: 1,
+  });
+});
+
