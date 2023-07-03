@@ -2,6 +2,7 @@ $(document).ready(function () {
   initDeleteResource();
   // initQuillEditor();
   initTaskForm();
+  toggleDisplayDiv();
 });
 
 function initDeleteResource() {
@@ -24,12 +25,21 @@ function initDeleteResource() {
 
 function initQuillEditor() {
   const quill = new Quill('#quill-editor', { theme: 'snow' });
-  
+
   quill.on('text-change', function () {
     document.getElementById('content').value = quill.root.innerHTML;
   });
 
   return quill;
+}
+
+function initTaskForm() {
+  const quill = initQuillEditor();
+
+  $("#task-form").on("submit", function (event) {
+    const actionUrl = $(this).data('action-url');
+    submitForm(event, actionUrl);
+  });
 }
 
 function submitForm(event, resourceURL) {
@@ -58,15 +68,6 @@ function submitForm(event, resourceURL) {
     });
 }
 
-function initTaskForm() {
-  const quill = initQuillEditor();
-
-  $("#task-form").on("submit", function (event) {
-    const actionUrl = $(this).data('action-url');
-    submitForm(event, actionUrl);
-  });
-}
-
 function showAlert(type, message) {
   const alert = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
     ${message}
@@ -78,4 +79,13 @@ function showAlert(type, message) {
   // Get the alert container and add the alert to it
   const alertContainer = document.getElementById('alert-container');
   alertContainer.insertAdjacentHTML('beforeend', alert);
+}
+
+function toggleDisplayDiv() {
+  $(document).ready(function () {
+    $('.toggle-button').click(function () {
+      $(this).next('.display-div').toggle();
+      console.log('algo');
+    });
+  });
 }
