@@ -1,10 +1,24 @@
 $(document).ready(function () {
+  initResizable();
+  // initDataTables();
   initDeleteResource();
   initTaskForm();
   toggleDisplayDiv();
   objectives_search();
   trunk_content_search();
 });
+
+function initResizable() {
+  $(function () {
+    $(".table").colResizable();
+  });
+}
+
+// function initDataTables() {
+//   $(document).ready(function () {
+//     $('.table').DataTable();
+//   });
+// }
 
 function initDeleteResource() {
   $('.delete-resource').on('click', function (event) {
