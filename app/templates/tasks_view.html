@@ -102,7 +102,7 @@
         <td>{{ task.time_estimation }}</td>
         <td>
           {% for file in task.additional_files %}
-          <a href="{{ url_for('task_api_bp.get_file', filename=file) }}">{{ file }}</a><br>
+          <a href="{{ url_for('task_api_bp.get_file', filename=file.path) }}">{{ file.path }}</a><br>
           {% endfor %}
         </td>
         <td>
