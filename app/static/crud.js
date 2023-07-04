@@ -144,7 +144,7 @@ function trunk_content_search() {
         processResults: function (data) {
           return {
             results: data.trunk_contents.map(function (trunk_content) {
-              return { id: trunk_content.id, text: trunk_content.name };
+              return { id: trunk_content.name, text: trunk_content.name };
             })
           };
         },
