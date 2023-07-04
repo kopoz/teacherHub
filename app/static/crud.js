@@ -1,8 +1,9 @@
 $(document).ready(function () {
   initDeleteResource();
-  // initQuillEditor();
   initTaskForm();
   toggleDisplayDiv();
+  objectives_search();
+  trunk_content_search();
 });
 
 function initDeleteResource() {
@@ -90,32 +91,66 @@ function toggleDisplayDiv() {
   });
 }
 
-$(document).ready(function() {
-  var url = $('#tags').data('url');  // Get URL from data-url attribute
 
-  $('#tags').select2({
-    width: '100%',
-    tags: true,
-    tokenSeparators: [','],
-    ajax: {
-      url: url,
-      dataType: 'json',
-      delay: 250,
-      data: function (params) {
-        return {
-          q: params.term
-        };
+function objectives_search() {
+  $(document).ready(function () {
+    var url = $('#objectives').data('url');  // Get URL from data-url attribute
+
+    $('#objectives').select2({
+      width: '100%',
+      tags: true,
+      tokenSeparators: [','],
+      ajax: {
+        url: url,
+        dataType: 'json',
+        delay: 250,
+        data: function (params) {
+          return {
+            q: params.term
+          };
+        },
+        processResults: function (data) {
+          return {
+            results: data.objectives.map(function (objective) {
+              return { id: objective.name, text: objective.name };
+            })
+          };
+        },
+        cache: true
       },
-      processResults: function (data) {
-        return {
-          results: data.tags.map(function(tag) {
-            return { id: tag.id, text: tag.name };
-          })
-        };
-      },
-      cache: true
-    },
-    minimumInputLength: 1,
+      minimumInputLength: 1,
+    });
   });
-});
+}
 
+
+function trunk_content_search() {
+  $(document).ready(function () {
+    var url = $('#trunk_contents').data('url');  // Get URL from data-url attribute
+
+    $('#trunk_contents').select2({
+      width: '100%',
+      tags: true,
+      tokenSeparators: [','],
+      ajax: {
+        url: url,
+        dataType: 'json',
+        delay: 250,
+        data: function (params) {
+          return {
+            q: params.term
+          };
+        },
+        processResults: function (data) {
+          return {
+            results: data.trunk_contents.map(function (trunk_content) {
+              return { id: trunk_content.id, text: trunk_content.name };
+            })
+          };
+        },
+        cache: true
+      },
+      minimumInputLength: 1,
+    });
+  });
+}

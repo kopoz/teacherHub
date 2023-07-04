@@ -1,7 +1,7 @@
 # backend/app/views/task_view.py
 from flask import send_from_directory
 from flask import Blueprint, request, jsonify, render_template
-from ..models import db, Task, Tag
+from ..models import db, Task, TrunkContent, Objective
 from werkzeug.utils import secure_filename
 import os
 
@@ -30,25 +30,31 @@ def allowed_file(filename):
 @task_api_bp.route('/api/v1/tasks', methods=['POST'])
 def create_task():
     content = request.form.get('content')
-    name = request.form.get('name')
     targeted_school_year = request.form.get('targeted_school_year')
     time_estimation = request.form.get('time_estimation')
     additional_files = request.files.getlist('additional_files')
 
     new_task = Task(
         content=content,
-        name=name,
         targeted_school_year=targeted_school_year,
         time_estimation=time_estimation,
     )
 
-    tag_names = request.form.getlist('tags[]')
-    for name in tag_names:
-        tag = Tag.query.filter_by(name=name).first()
-        if not tag:
-            tag = Tag(name=name)
-            db.session.add(tag)
-        new_task.tags.append(tag)
+    objectives = request.form.getlist('objectives[]')
+    for name in objectives:
+        objective = Objective.query.filter_by(name=name).first()
+        if not objective:
+            objective = Objective(name=name)
+            db.session.add(objective)
+        new_task.objectives.append(objective)
+
+    trunk_contents = request.form.getlist('trunk_contents[]')
+    for name in trunk_contents:
+        trunk_content = TrunkContent.query.filter_by(name=name).first()
+        if not trunk_content:
+            trunk_content = TrunkContent(name=name)
+            db.session.add(trunk_content)
+        new_task.trunk_contents.append(trunk_content)
 
     if additional_files:
         filenames = []
@@ -106,8 +112,14 @@ def get_file(filename):
     return send_from_directory(UPLOAD_FOLDER, filename, as_attachment=True)
 
 
-@task_api_bp.route('/api/v1/tags', methods=['GET'])
-def get_tags():
+@task_api_bp.route('/api/v1/objectives', methods=['GET'])
+def get_objectives():
     query = request.args.get('q', '')
-    tags = Tag.query.filter(Tag.name.like(f'%{query}%')).all()
-    return jsonify(tags=[tag.to_dict() for tag in tags])
+    objectives = Objective.query.filter(Objective.name.like(f'%{query}%')).all()
+    return jsonify(objectives=[objective.to_dict() for objective in objectives])
+
+@task_api_bp.route('/api/v1/trunk_contents', methods=['GET'])
+def get_trunk_contents():
+    query = request.args.get('q', '')
+    trunk_contents = TrunkContent.query.filter(TrunkContent.name.like(f'%{query}%')).all()
+    return jsonify(trunk_contents=[trunk_content.to_dict() for trunk_content in trunk_contents])

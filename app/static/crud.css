@@ -1,0 +1,19 @@
+    .badge {
+      display: inline-block;
+      max-width: 100%;
+      white-space: normal;
+      padding: 0.2em 0.4em;
+      margin-right: 0.2em;
+    }
+
+
+
+    .badge.trunk-content {
+      color: #fff;
+      background-color: #007bff;
+    }
+
+    .badge.objective {
+      color: #fff;
+      background-color: #28a745;
+    }
