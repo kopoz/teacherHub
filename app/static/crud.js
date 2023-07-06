@@ -3,8 +3,10 @@ $(document).ready(function () {
   // initDataTables();
   initDeleteResource();
   initTaskForm();
-  toggleDisplayDiv();
+  // toggleDisplayDiv();
   objectives_search();
+  toggleForm();
+  toggleContent();
   trunk_content_search();
 });
 
@@ -38,6 +40,14 @@ function initDeleteResource() {
   });
 }
 
+function toggleForm() {
+  $(document).ready(function () {
+    $('#openTaskFormButton').click(function () {
+      $('#taskFormModal').modal('show');
+    });
+  });
+}
+
 function initQuillEditor() {
   const quill = new Quill('#quill-editor', { theme: 'snow' });
 
@@ -51,16 +61,18 @@ function initQuillEditor() {
 function initTaskForm() {
   const quill = initQuillEditor();
 
-  $("#task-form").on("submit", function (event) {
-    const actionUrl = $(this).data('action-url');
-    submitForm(event, actionUrl);
+  $("#submitForm").on("click", function () {
+    const actionUrl = $('#task-form').data('action-url');
+    submitForm($('#task-form'), actionUrl);
+  });
+
+  $("#clearForm").on("click", function () {
+    $("#task-form").trigger('reset');
   });
 }
 
-function submitForm(event, resourceURL) {
-  event.preventDefault();
-
-  const formData = new FormData(event.target);
+function submitForm(form, resourceURL) {
+  const formData = new FormData(form[0]);
 
   fetch(resourceURL, {
     method: 'POST',
@@ -76,12 +88,14 @@ function submitForm(event, resourceURL) {
     .then(data => {
       console.log("Data sent successfully");
       showAlert('success', 'Task created successfully!');
+      $('#taskFormModal').modal('hide');
     })
     .catch(error => {
       console.log("Error in sending data", error);
       showAlert('danger', 'Failed to create task. Please try again.');
     });
 }
+
 
 function showAlert(type, message) {
   const alert = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
@@ -101,6 +115,17 @@ function toggleDisplayDiv() {
     $('.toggle-button').click(function () {
       $(this).next('.display-div').toggle();
       console.log('algo');
+    });
+  });
+}
+
+function toggleContent() {
+  $(document).ready(function () {
+    $('.toggle-button').click(function () {
+      var taskId = $(this).data('task-id');
+      var content = $(this).next('#contentModal' + taskId + ' .modal-body').html();
+      $('#contentModal' + taskId + ' .modal-body').html(content);
+      $('#contentModal' + taskId).modal('show');
     });
   });
 }

@@ -2,33 +2,39 @@
 
 {% block content %}
 
-  <!-- Include stylesheet -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.core.min.css" integrity="sha512-AqSNjpJ7R92d+ANZrrP/hSBerCkDCQE/EILn5MylysaRmbi0Jwi56r39McL3p7LJnO+bjthpFu8GQ2y/d0fECg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.min.js" integrity="sha512-P2W2rr8ikUPfa31PLBo5bcBQrsa+TNj8jiKadtaIrHQGMo6hQM6RdPjQYxlNguwHz8AwSQ28VkBK6kHBLgd/8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<!-- Include stylesheet -->
+    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet"> 
+    <script src="https://cdn.quilljs.com/1.3.7/quill.js"></script>
 
-  <link href="{{ url_for('static', filename='crud.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='crud.css') }}" rel="stylesheet">
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" integrity="sha512-2ImtlRlf2VVmiGZsjm9bEyhjGW4dU7B6TNwh/hx/iSByxNENtj3WVE6o/9Lj4TJeVXPi4bnOIMXFIJJAeufa0A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" integrity="sha512-nMNlpuaDPrqlEls3IX/Q56H36qvBASwb3ipuo3MxeWbsQB1881ox0cRv7UPTgBlriqoynt35KjEwgGUeUXIPnw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"
+  integrity="sha512-2ImtlRlf2VVmiGZsjm9bEyhjGW4dU7B6TNwh/hx/iSByxNENtj3WVE6o/9Lj4TJeVXPi4bnOIMXFIJJAeufa0A=="
+  crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css"
+  integrity="sha512-nMNlpuaDPrqlEls3IX/Q56H36qvBASwb3ipuo3MxeWbsQB1881ox0cRv7UPTgBlriqoynt35KjEwgGUeUXIPnw=="
+  crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 
+<h1>auxiiliar</h1>
+  <div id="toolbar"></div>
+<div id="quill-editor2"></div>
 <h1>Tasks</h1>
 
 <div id="alert-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
   <!-- Alerts will be added here -->
 </div>
 <!-- Task Form Card -->
-<div class="card">
-  <div class="card-header" id="taskFormHeading">
-    <h5 class="mb-0">
-      <button class="btn btn-link" type="button" data-bs-toggle="collapse" href="#task-form-container"
-        aria-expanded="true" aria-controls="task-form-container">Toggle Task Form
-      </button>
-    </h5>
-  </div>
-
-  <div id="task-form-container" class="collapse" aria-labelledby="taskFormHeading">
-    <div class="card-body">
+<div class="modal" tabindex="-1" role="dialog" id="taskFormModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Task Form</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
       <form id="task-form" data-action-url="{{ url_for('task_api_bp.create_task') }}" method="post"
         enctype="multipart/form-data">
         <div class="form-group">
@@ -62,12 +68,22 @@
         </div>
         <button type="submit" class="btn btn-primary">Create Task</button>
       </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="submitForm">Submit</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-danger" id="clearForm">Clear Form</button>
+      </div>
     </div>
   </div>
 </div>
 
+<button type="button" class="btn btn-primary" id="openTaskFormButton">
+  Open Task Form
+</button>
+
+
 <!-- List of Tasks -->
-User
 <div class="table-responsive">
   <table class="table table-striped mt-4 table-bordered table-sm table-purple table-hover">
     <thead>
@@ -85,8 +101,30 @@ User
       {% for task in tasks %}
       <tr>
         <td>
-          <button class="toggle-button">Toggle display</button>
-          <div class="display-div" style="display: none;">{{ task.content|safe }}</div>
+          <button class="toggle-button" data-task-id="{{ task.id }}">Toggle display</button>
+          <!-- <div class="display-div" style="display: none;">{{ task.content|safe }}</div> -->
+          <!-- <div class="modal fade" id="contentModal" tabindex="-1" role="dialog" aria-labelledby="contentModalLabel" -->
+            <!-- aria-hidden="true"> -->
+          <div class="modal fade" id="contentModal{{ task.id }}" tabindex="-1" role="dialog"
+            aria-labelledby="contentModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="contentModalLabel">Content</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body" id="contentModalBody">
+                  {{ task.content|safe }}
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-primary" id="downloadPdf">Download PDF</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </td>
         <td>
           {% for objective in task.objectives %}
