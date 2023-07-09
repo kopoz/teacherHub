@@ -16,6 +16,11 @@
       background-color: #28a745;
     }
 
+    .badge.label{
+      color: #fff;
+      background-color: #FF7bff;
+    }
+
 
     #openTaskFormButton {
     border-radius: 50%; /* makes the button circular */

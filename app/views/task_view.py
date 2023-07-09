@@ -1,7 +1,8 @@
 # backend/app/views/task_view.py
 from flask import send_from_directory
 from flask import Blueprint, request, jsonify, render_template
-from ..models import db, Task, TrunkContent, Objective, File
+from ..models import db, Task, TrunkContent, Objective, File, Label
+from .utils import create_label_like
 from werkzeug.utils import secure_filename
 import os
 
@@ -38,21 +39,9 @@ def create_task():
         time_estimation=time_estimation,
     )
 
-    objectives = request.form.getlist('objectives[]')
-    for name in objectives:
-        objective = Objective.query.filter_by(name=name).first()
-        if not objective:
-            objective = Objective(name=name)
-            db.session.add(objective)
-        new_task.objectives.append(objective)
-
-    trunk_contents = request.form.getlist('trunk_contents[]')
-    for name in trunk_contents:
-        trunk_content = TrunkContent.query.filter_by(name=name).first()
-        if not trunk_content:
-            trunk_content = TrunkContent(name=name)
-            db.session.add(trunk_content)
-        new_task.trunk_contents.append(trunk_content)
+    new_task.objectives.extend(create_label_like(request.form.getlist('objectives[]'), Objective))
+    new_task.trunk_contents.extend(create_label_like(request.form.getlist('trunk_contents[]'), TrunkContent))
+    new_task.labels.extend(create_label_like(request.form.getlist('labels[]'), Label))
 
     if additional_files:
         filenames = []
@@ -106,9 +95,6 @@ def delete_task(id):
     db.session.commit()
     return '', 204
 
-
-
-
 @task_api_bp.route('/files/<filename>')
 def get_file(filename):
     return send_from_directory(UPLOAD_FOLDER, filename, as_attachment=True)
@@ -125,3 +111,9 @@ def get_trunk_contents():
     query = request.args.get('q', '')
     trunk_contents = TrunkContent.query.filter(TrunkContent.name.like(f'%{query}%')).all()
     return jsonify(trunk_contents=[trunk_content.to_dict() for trunk_content in trunk_contents])
+
+@task_api_bp.route('/api/v1/labels', methods=['GET'])
+def get_labels():
+    query = request.args.get('q', '')
+    labels = Label.query.filter(TrunkContent.name.like(f'%{query}%')).all()
+    return jsonify(labels=[label.to_dict() for label in labels])

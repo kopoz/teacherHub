@@ -17,6 +17,13 @@ _objectives = db.Table('objectives',
                            'task.id'), primary_key=True)
                        )
 
+_labels = db.Table('labels',
+                       db.Column('label_id', db.Integer, db.ForeignKey(
+                           'label.id'), primary_key=True),
+                       db.Column('task_id', db.Integer, db.ForeignKey(
+                           'task.id'), primary_key=True)
+                       )
+
 
 class TrunkContent(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -39,6 +46,15 @@ class Objective(db.Model):
             'name': self.name,
         }
 
+class Label(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), unique=True, nullable=False)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+        }
 
 class File(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -61,6 +77,8 @@ class Task(db.Model):
     trunk_contents = db.relationship('TrunkContent', secondary=_trunk_contents, lazy='subquery',
                                      backref=db.backref('tasks', lazy=True))
     objectives = db.relationship('Objective', secondary=_objectives, lazy='subquery',
+                                 backref=db.backref('tasks', lazy=True))
+    labels = db.relationship('Label', secondary=_labels, lazy='subquery',
                                  backref=db.backref('tasks', lazy=True))
     additional_files = db.relationship('File', backref='task', lazy=True)
 

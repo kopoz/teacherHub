@@ -32,50 +32,52 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Task Form</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <h5 class="modal-title">Formulario de actividades</h5>
+        <button type="button" class="close" id="closeButton" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
+
       </div>
       <div class="modal-body">
         <form id="task-form" data-action-url="{{ url_for('task_api_bp.create_task') }}" method="post"
           enctype="multipart/form-data">
           <div class="form-group">
-            <label for="quill-editor">Task Content</label>
+            <label for="quill-editor">Planificación:</label>
             <div id="quill-editor"></div>
             <input type="hidden" name="content" id="content">
           </div>
           <div class="form-group">
-            <label for="targeted_school_year">Targeted School Year</label>
-            <input type="number" class="form-control" id="targeted_school_year" name="targeted_school_year"
-              placeholder="Targeted School Year" required>
+            <label for="targeted_school_year">Año escolar sugerido:</label>
+            <input type="number" class="form-control" id="targeted_school_year" name="targeted_school_year" required>
           </div>
           <div class="form-group">
-            <label for="time_estimation">Time Estimation</label>
-            <input type="number" class="form-control" id="time_estimation" name="time_estimation"
-              placeholder="Time Estimation" required>
+            <label for="time_estimation">Tiempo estimado (min):</label>
+            <input type="number" class="form-control" id="time_estimation" name="time_estimation" required>
           </div>
           <div class="form-group">
-            <label for="objectives">Objective</label>
+            <label for="objectives">Objetivo:</label>
             <select class="form-control" id="objectives" name="objectives[]"
               data-url="{{ url_for('task_api_bp.get_objectives') }}" multiple></select>
           </div>
           <div class="form-group">
-            <label for="trunk_contents">Trunk Content</label>
+            <label for="trunk_contents">Contenido torncal:</label>
             <select class="form-control" id="trunk_contents" name="trunk_contents[]"
               data-url="{{ url_for('task_api_bp.get_trunk_contents') }}" multiple></select>
           </div>
           <div class="form-group">
-            <label for="additional_files">Additional Files</label>
+            <label for="labels">Etiquetas:</label>
+            <select class="form-control" id="labels" name="labels[]" data-url="{{ url_for('task_api_bp.get_labels') }}"
+              multiple></select>
+          </div>
+          <div class="form-group">
+            <label for="additional_files">Archivos</label>
             <input type="file" class="form-control-file" id="additional_files" name="additional_files[]" multiple>
           </div>
-          <button type="submit" class="btn btn-primary">Create Task</button>
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" id="submitForm">Submit</button>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-danger" id="clearForm">Clear Form</button>
+        <button type="button" class="btn btn-danger" id="clearForm">Vaciar</button>
+        <button type="button" class="btn btn-primary" id="submitForm">Crear</button>
       </div>
     </div>
   </div>
@@ -94,9 +96,10 @@
         <th>Actividad</th>
         <th>Objetivos</th>
         <th>Contenido Troncal</th>
-        <th>Año escolar</th>
-        <th>Estimacion en min</th>
-        <th>Archivos Adicionales</th>
+        <th>Etiquetas</th>
+        <th>Año</th>
+        <th>Min</th>
+        <th>Archivos</th>
         <th>Acciones</th>
       </tr>
     </thead>
@@ -112,7 +115,7 @@
               <div class="modal-content">
                 <div class="modal-header">
                   <h5 class="modal-title" id="contentModalLabel">Content</h5>
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <button type="button" class="close-table-modal" data-task-id="{{ task.id }}" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                   </button>
                 </div>
@@ -135,6 +138,11 @@
         <td>
           {% for trunk_content in task.trunk_contents %}
           <span class="badge trunk-content">{{ trunk_content.name }}</span>
+          {% endfor %}
+        </td>
+        <td>
+          {% for label in task.labels %}
+          <span class="badge label">{{ label.name }}</span>
           {% endfor %}
         </td>
         <td>{{ task.targeted_school_year }}</td>

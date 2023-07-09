@@ -8,6 +8,7 @@ $(document).ready(function () {
   toggleContent();
   search('#objectives', 'objectives');
   search('#trunk_contents', 'trunk_contents');
+  search('#labels', 'labels');
 });
 
 function initResizable() {
@@ -57,6 +58,11 @@ function toggleForm() {
       $('#taskFormModal').modal('show');
     });
   });
+
+  $("#closeButton").on("click", function () {
+    $('#taskFormModal').modal('hide');
+  });
+
 }
 
 function initQuillEditor() {
@@ -79,6 +85,7 @@ function initTaskForm() {
 
   $("#clearForm").on("click", function () {
     $("#task-form").trigger('reset');
+    quill.setContents('');
   });
 }
 
@@ -124,20 +131,24 @@ function toggleDisplayDiv() {
   $(document).ready(function () {
     $('.toggle-button').click(function () {
       $(this).next('.display-div').toggle();
-      console.log('algo');
     });
   });
 }
 
 function toggleContent() {
-  $(document).ready(function () {
     $('.toggle-button').click(function () {
       var taskId = $(this).data('task-id');
       var content = $(this).next('#contentModal' + taskId + ' .modal-body').html();
       $('#contentModal' + taskId + ' .modal-body').html(content);
       $('#contentModal' + taskId).modal('show');
     });
-  });
+
+
+    $(".close-table-modal").on("click", function () {
+      var taskId = $(this).data('task-id');
+      $('#contentModal' + taskId).modal('hide');
+    });
+
 }
 
 
@@ -149,6 +160,7 @@ function search(selectId, resultKey) {
       width: '100%',
       tags: true,
       tokenSeparators: [','],
+      dropdownParent: $("#taskFormModal"),
       ajax: {
         url: url,
         dataType: 'json',
