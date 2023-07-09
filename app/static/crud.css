@@ -15,3 +15,13 @@
       color: #fff;
       background-color: #28a745;
     }
+
+
+    #openTaskFormButton {
+    border-radius: 50%; /* makes the button circular */
+    padding: 10px 15px; /* provides space for the plus sign */
+    position: fixed; /* allows the button to stay in a specific position */
+    top: 10px; /* positions the button from the top */
+    right: 10px; /* positions the button from the right */
+    z-index: 9999; /* keeps the button above other elements */
+}

@@ -1,13 +1,13 @@
 $(document).ready(function () {
-  initResizable();
-  // initDataTables();
+  // initResizable();
+  initDataTables();
   initDeleteResource();
   initTaskForm();
   // toggleDisplayDiv();
-  objectives_search();
   toggleForm();
   toggleContent();
-  trunk_content_search();
+  search('#objectives', 'objectives');
+  search('#trunk_contents', 'trunk_contents');
 });
 
 function initResizable() {
@@ -16,11 +16,22 @@ function initResizable() {
   });
 }
 
-// function initDataTables() {
-//   $(document).ready(function () {
-//     $('.table').DataTable();
-//   });
-// }
+function initDataTables() {
+  $(document).ready(function () {
+    $('#myTable').DataTable({
+      "scrollX": true,
+      "columnDefs": [
+        { "width": "20%" },
+        { "width": "30%" },
+        { "width": "20%" },
+        { "width": "10%" },
+        { "width": "5%" },
+        { "width": "5%" },
+        { "width": "10%" },
+      ]
+    });
+  });
+}
 
 function initDeleteResource() {
   $('.delete-resource').on('click', function (event) {
@@ -105,7 +116,6 @@ function showAlert(type, message) {
     </button>
   </div>`;
 
-  // Get the alert container and add the alert to it
   const alertContainer = document.getElementById('alert-container');
   alertContainer.insertAdjacentHTML('beforeend', alert);
 }
@@ -131,11 +141,11 @@ function toggleContent() {
 }
 
 
-function objectives_search() {
+function search(selectId, resultKey) {
   $(document).ready(function () {
-    var url = $('#objectives').data('url');  // Get URL from data-url attribute
+    var url = $(selectId).data('url');  // Get URL from data-url attribute
 
-    $('#objectives').select2({
+    $(selectId).select2({
       width: '100%',
       tags: true,
       tokenSeparators: [','],
@@ -150,8 +160,8 @@ function objectives_search() {
         },
         processResults: function (data) {
           return {
-            results: data.objectives.map(function (objective) {
-              return { id: objective.name, text: objective.name };
+            results: data[resultKey].map(function (item) {
+              return { id: item.name, text: item.name };
             })
           };
         },
@@ -162,34 +172,3 @@ function objectives_search() {
   });
 }
 
-
-function trunk_content_search() {
-  $(document).ready(function () {
-    var url = $('#trunk_contents').data('url');  // Get URL from data-url attribute
-
-    $('#trunk_contents').select2({
-      width: '100%',
-      tags: true,
-      tokenSeparators: [','],
-      ajax: {
-        url: url,
-        dataType: 'json',
-        delay: 250,
-        data: function (params) {
-          return {
-            q: params.term
-          };
-        },
-        processResults: function (data) {
-          return {
-            results: data.trunk_contents.map(function (trunk_content) {
-              return { id: trunk_content.name, text: trunk_content.name };
-            })
-          };
-        },
-        cache: true
-      },
-      minimumInputLength: 1,
-    });
-  });
-}
